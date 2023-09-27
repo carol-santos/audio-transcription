@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import * as React from 'react';
-import { StyleSheet, SafeAreaView, TouchableOpacity, Text, Button, Video} from 'react-native'
+import { StyleSheet, SafeAreaView, Text, Button } from 'react-native'
 import {launchImageLibrary} from 'react-native-image-picker';
 import Sound from 'react-native-sound';
 import RNFS from 'react-native-fs';
-import { FFmpegKit } from 'ffmpeg-kit-react-native';
+import { FFmpegKit, ReturnCode } from 'ffmpeg-kit-react-native';
 
 export default function HomeTest() {
 
@@ -20,38 +20,38 @@ export default function HomeTest() {
         if(!result.cancelled){
           const videoUri = result.assets[0].uri
           console.log("URI do vídeo selecionado:", videoUri);
-          setVideo(result.uri);
+          // setVideo(result.uri);
+          setVideo(result.assets[0].uri);
         }
     }
 
     const convertVideoToAudio = async () => {
-  
-      // const command = '-i ${videoUri} -vn -c:a mp3 -strict -2 test.mp3';
-      // const command = '-i ${videoUri} -c:v mp3 audio.mp3';
 
-      // const session = FFmpegKit.execute(command);
-      // const returnCode = await session.getReturnCode();
+      /*
+      ------------ Definições ------------
+      -i = nome do arquivo de entrada
+      -c:a = codec de áudio
+      ------------------------------------
+      */
 
-      // if (ReturnCode.isSuccess(returnCode)) {
-      //     const data = ffmpeg.FS('readFile', 'test.mp3');
-      //     setAudio(URL.createObjectURL(new Blob([data.buffer], { type: 'audio/mp3' })));
-      //     console.log("audio:", data)
-      //     console.log("Áudio convertido com sucesso");
-      // } else {
-      //     console.error("Erro durante a conversão de vídeo para áudio");
-      // }
+      // FFmpegKit.execute(`-i ${video} -c:v mp3 audio.mp3`).then(async (session) => {
+        FFmpegKit.execute(`-i ${video} -c:a mp3 audio.mp3`).then(async (session) => {
+        console.log("URI - convertVideoToAudio: ", video)
 
-      const session = FFmpegKit.execute("-i ${videoUri} -c:v mp3 audio.mp3");
-      if (ReturnCode.isSuccess(session.getReturnCode())) {
-            const data = ffmpeg.FS('readFile', 'test.mp3');
-            setAudio(URL.createObjectURL(new Blob([data.buffer], { type: 'audio/mp3' })));
-            console.log("audio:", data)
-            console.log("Áudio convertido com sucesso");
-      } else if (ReturnCode.isCancel(session.getReturnCode())) {
+        const returnCode = await session.getReturnCode();
 
-      } else {
-          Log.d(TAG, String.format("Command failed with state %s and rc %s.%s", session.getState(), session.getReturnCode(), session.getFailStackTrace()));
-      } 
+        if (ReturnCode.isSuccess(returnCode)) {
+              const data = ffmpeg.FS('readFile', 'audio.mp3');
+              setAudio(URL.createObjectURL(new Blob([data.buffer], { type: 'audio/mp3' })));
+              console.log("audio:", data)
+              console.log("Áudio convertido com sucesso");
+        } else if (ReturnCode.isCancel(returnCode)) {
+
+        } else (error) => {
+          console.log("Erro na conversão:", error)
+            // Log.d(TAG, String.format("Command failed with state %s and rc %s.%s", session.getState(), session.getReturnCode(), session.getFailStackTrace()));
+        } 
+      })
     };
 
     const playAudio = () => {
