@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import * as React from 'react';
 import { StyleSheet, SafeAreaView, Text, Button } from 'react-native'
-import {launchImageLibrary} from 'react-native-image-picker';
-import Sound from 'react-native-sound';
+import {launchCamera} from 'react-native-image-picker';
 import RNFS from 'react-native-fs';
 import { FFmpegKit, ReturnCode } from 'ffmpeg-kit-react-native';
 
@@ -12,7 +11,7 @@ export default function HomeTest() {
     const [audio, setAudio] = useState("");
 
     const pickVideo = async () => {
-        let result = await launchImageLibrary({
+        let result = await launchCamera({
             mediaType: "video",
         });
         console.log("Resultado : ",result)
@@ -35,23 +34,24 @@ export default function HomeTest() {
       */
 
       // FFmpegKit.execute(`-i ${video} -c:v mp3 audio.mp3`).then(async (session) => {
-        FFmpegKit.execute(`-i ${video} -c:a mp3 audio.mp3`).then(async (session) => {
+        FFmpegKit.execute(`-i ${video} -c:v mpeg3 audio.mp3`).then(async (session) => {
         console.log("URI - convertVideoToAudio: ", video)
 
         const returnCode = await session.getReturnCode();
-
+          console.log({returnCode, session})
         if (ReturnCode.isSuccess(returnCode)) {
+            console.log('sucesso')
               const data = ffmpeg.FS('readFile', 'audio.mp3');
               setAudio(URL.createObjectURL(new Blob([data.buffer], { type: 'audio/mp3' })));
               console.log("audio:", data)
               console.log("Áudio convertido com sucesso");
         } else if (ReturnCode.isCancel(returnCode)) {
-
+          console.log('elif')
         } else (error) => {
           console.log("Erro na conversão:", error)
             // Log.d(TAG, String.format("Command failed with state %s and rc %s.%s", session.getState(), session.getReturnCode(), session.getFailStackTrace()));
         } 
-      })
+      }).catch(e => console.log('error', e))
     };
 
     const playAudio = () => {
