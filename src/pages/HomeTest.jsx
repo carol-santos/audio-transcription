@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import * as React from 'react';
 import { StyleSheet, SafeAreaView, Text, Button } from 'react-native'
-import {launchCamera} from 'react-native-image-picker';
-import RNFS from 'react-native-fs';
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import Sound from 'react-native-sound';
 import { FFmpegKit, ReturnCode } from 'ffmpeg-kit-react-native';
 
 export default function HomeTest() {
@@ -11,7 +11,7 @@ export default function HomeTest() {
     const [audio, setAudio] = useState("");
 
     const pickVideo = async () => {
-        let result = await launchCamera({
+        let result = await launchImageLibrary({
             mediaType: "video",
         });
         console.log("Resultado : ",result)
@@ -26,43 +26,40 @@ export default function HomeTest() {
 
     const convertVideoToAudio = async () => {
 
-      /*
-      ------------ Definições ------------
-      -i = nome do arquivo de entrada
-      -c:a = codec de áudio
-      ------------------------------------
-      */
-
-      // FFmpegKit.execute(`-i ${video} -c:v mp3 audio.mp3`).then(async (session) => {
-        FFmpegKit.execute(`-i ${video} -c:v mpeg3 audio.mp3`).then(async (session) => {
+        // FFmpegKit.execute(`-i ${video} -c:v mpeg3 audio.mp3`).then(async (session) => {
+        FFmpegKit.execute(`-i ${video} -c:v mpeg3 filePath.mp3`).then(async (session) => {
         console.log("URI - convertVideoToAudio: ", video)
 
         const returnCode = await session.getReturnCode();
           console.log({returnCode, session})
         if (ReturnCode.isSuccess(returnCode)) {
             console.log('sucesso')
-              const data = ffmpeg.FS('readFile', 'audio.mp3');
-              setAudio(URL.createObjectURL(new Blob([data.buffer], { type: 'audio/mp3' })));
-              console.log("audio:", data)
-              console.log("Áudio convertido com sucesso");
+            setAudio('filePath.mp3')
+            console.log("Áudio convertido com sucesso");
         } else if (ReturnCode.isCancel(returnCode)) {
           console.log('elif')
         } else (error) => {
           console.log("Erro na conversão:", error)
-            // Log.d(TAG, String.format("Command failed with state %s and rc %s.%s", session.getState(), session.getReturnCode(), session.getFailStackTrace()));
         } 
       }).catch(e => console.log('error', e))
     };
 
     const playAudio = () => {
-      // if (audio) {
-      //   try {
-      //     SoundPlayer.playSoundFile(audio, 'mp3');
-      //   } catch (error) {
-      //     console.error('Erro ao reproduzir o áudio:', error);
-      //   }
-      // }
-    };
+
+      var sound = new Sound(audio, Sound.MAIN_BUNDLE, (error) => {
+        if (error) {
+          console.log('Não foi possível carregar o som', error);
+          return;
+        }
+        sound.play((success) => {
+          if (success) {
+            console.log('Áudio reproduzido com sucesso');
+          } else {
+            console.log('Erro ao reproduzir o áudio');
+          }
+        });
+    });
+  }
 
     return (
       <SafeAreaView style={styles.container}>
@@ -72,7 +69,7 @@ export default function HomeTest() {
           onPress={pickVideo}
         />
         <Button title='Converter' onPress={convertVideoToAudio}/>
-        {/* <Button title='Reproduzir áudio' onPress={playAudio} /> */}
+        <Button title='Reproduzir áudio' onPress={playAudio} />
     </SafeAreaView>
     );
   }
