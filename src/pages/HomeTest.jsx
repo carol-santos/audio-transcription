@@ -25,23 +25,25 @@ export default function HomeTest() {
     }
 
     const convertVideoToAudio = async () => {
+      
+        const audioFile = video.replace('.mp4', '.mp3')
 
-        // FFmpegKit.execute(`-i ${video} -c:v mpeg3 audio.mp3`).then(async (session) => {
-        FFmpegKit.execute(`-i ${video} -c:v mpeg3 filePath.mp3`).then(async (session) => {
+        // FFmpegKit.execute(`-i ${video} -c:v mpeg3 filePath.mp3`).then(async (session) => {
+        FFmpegKit.execute(`-y -i ${video} -c:v mpeg3 ${audioFile}`).then(async (session) => {
         console.log("URI - convertVideoToAudio: ", video)
 
         const returnCode = await session.getReturnCode();
           console.log({returnCode, session})
         if (ReturnCode.isSuccess(returnCode)) {
             console.log('sucesso')
-            setAudio('filePath.mp3')
+            setAudio(audioFile)
             console.log("Áudio convertido com sucesso");
         } else if (ReturnCode.isCancel(returnCode)) {
           console.log('elif')
         } else (error) => {
           console.log("Erro na conversão:", error)
         } 
-      }).catch(e => console.log('error', e))
+        }).catch(e => console.log('error', e))
     };
 
     const playAudio = () => {
@@ -58,8 +60,8 @@ export default function HomeTest() {
             console.log('Erro ao reproduzir o áudio');
           }
         });
-    });
-  }
+      });
+    }
 
     return (
       <SafeAreaView style={styles.container}>
@@ -72,7 +74,7 @@ export default function HomeTest() {
         <Button title='Reproduzir áudio' onPress={playAudio} />
     </SafeAreaView>
     );
-  }
+}
 
   const styles = StyleSheet.create({
     container: {
