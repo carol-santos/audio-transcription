@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import * as React from 'react';
-import { StyleSheet, SafeAreaView, Text, Button } from 'react-native'
+import { StyleSheet, SafeAreaView, Text, View } from 'react-native'
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import { Button } from 'native-base';
 import Sound from 'react-native-sound';
 import { FFmpegKit, ReturnCode } from 'ffmpeg-kit-react-native';
 
@@ -19,7 +20,6 @@ export default function HomeTest() {
         if(!result.cancelled){
           const videoUri = result.assets[0].uri
           console.log("URI do vídeo selecionado:", videoUri);
-          // setVideo(result.uri);
           setVideo(result.assets[0].uri);
         }
     }
@@ -28,7 +28,6 @@ export default function HomeTest() {
       
         const audioFile = video.replace('.mp4', '.mp3')
 
-        // FFmpegKit.execute(`-i ${video} -c:v mpeg3 filePath.mp3`).then(async (session) => {
         FFmpegKit.execute(`-y -i ${video} -c:v mpeg3 ${audioFile}`).then(async (session) => {
         console.log("URI - convertVideoToAudio: ", video)
 
@@ -65,13 +64,15 @@ export default function HomeTest() {
 
     return (
       <SafeAreaView style={styles.container}>
-        <Text style={styles.text}>Conversão de vídeo em áudio</Text>
-        <Button
-          title='Escolha video na galeria'
-          onPress={pickVideo}
-        />
-        <Button title='Converter' onPress={convertVideoToAudio}/>
-        <Button title='Reproduzir áudio' onPress={playAudio} />
+        <View style={styles.textContainer}>
+          <Text style={styles.text}>Conversão de vídeo</Text>
+          <Text style={styles.text}>em áudio</Text>
+        </View>
+        <View style={styles.buttonContainer}>
+          <Button style={styles.button} onPress={pickVideo}>Selecione o video</Button>
+          <Button style={styles.button} onPress={convertVideoToAudio}>Converter em áudio</Button>
+        </View>
+          <Button style={styles.buttonPlay} onPress={playAudio}>Reproduzir áudio</Button>
     </SafeAreaView>
     );
 }
@@ -83,9 +84,35 @@ export default function HomeTest() {
       justifyContent: 'center',
       alignItems: 'center',
     },
+    textContainer: {
+      justifyContent: 'flex-start',
+      alignItems: 'center',
+      paddingBottom: 50,
+    },
     text: {
       color: "#1E1D1D",
-      fontSize: 20,
+      fontSize: 30,
       fontWeight: 'bold',
     },
+    buttonContainer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+    },
+    button: {
+      backgroundColor: "#7A1AF4",
+      borderRadius: 25,
+      height: 60,
+      width: 150,
+      marginHorizontal: 5,
+      marginTop: 20,
+    },
+    buttonPlay: {
+      backgroundColor: "#37085C",
+      borderRadius: 50,
+      height: 60,
+      width: 300,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginTop: 20,
+    }
   });
